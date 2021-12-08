@@ -43,10 +43,12 @@ COPY . /src/client-sdk-fidoiot/
 RUN cmake -DREUSE=true
 RUN make
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq xxd
-RUN utils/keys_gen.sh .
 
 # from https://github.com/secure-device-onboard/client-sdk-fidoiot/blob/master/docs/setup.md#3-setting-the-manufacturer-network-address
 # YES, it needs the :port
 # This is the Device Initialization (DI) protocol:
-#RUN echo -n https://fdo.alho.st:443/ > data/manufacturer_addr.bin
-RUN echo -n http://10.13.13.10:8039/ > data/manufacturer_addr.bin
+ENV MANUFACTURER="http://localhost:8039/"
+# get rid of the defaults so the entrypoint sets it
+RUN rm data/manufacturer_addr.bin
+
+ENTRYPOINT "./docker-entrypoint.sh"
