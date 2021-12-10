@@ -55,15 +55,15 @@ rm ${TMPFILE}
 
 echo "PutVouchers: ${SERVICEINFO}"
 
+if [[ "${GUID}" == "" ]]; then
+    echo "ERROR in posting voucher - no GUID"
+    exit
+fi
+
+
 VOUCHERS=$(http --verify false --form --ignore-stdin GET ${PORTAINER_URL}/api/fdo/list "Authorization: ${jwt}")
 # this list should container the device GUID 
 echo "GetVouchers: ${VOUCHERS}"
-
-# if you can watch the fdo rz container logs, it'll eventually happen :D
-echo
-echo "Waiting for 60 seconds, for Manufacturer to tell RZ about 'TO0 completed for GUID: ${GUID}' "
-echo
-sleep 60
 
 # add more fdo_sys resources
 # see https://github.com/secure-device-onboard/pri-fidoiot/blob/2bac84514d02c89583585d3dfaa305681625c82a/component-samples/demo/owner/README.md
@@ -80,13 +80,13 @@ sleep 60
 # from https://github.com/secure-device-onboard/test-fidoiot/blob/6bdf0772a659ee997d4ee212f47ca65afc1af0b2/priTests/src/test/java/org/fidoalliance.fdo/test/PriSmokeTest.java
 # use priority to ensure they get sent to the device in the right order.
 # enable fdo_sys
-curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
-    -H "Content-Type: application/octet-stream" \
-    "${OWNER}api/v1/device/svi?module=fdo_sys&var=active&bytes=F5&priority=0&guid=${GUID}"
-# send the file
-curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
-    -H "Content-Type: application/octet-stream" --data-binary '@sven.sh' \
-    "${OWNER}api/v1/device/svi?module=fdo_sys&var=filedesc&priority=1&filename=init-${DEVICESERIALNUMBER}.sh&guid=${GUID}"
+# curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
+#     -H "Content-Type: application/octet-stream" \
+#     "${OWNER}api/v1/device/svi?module=fdo_sys&var=active&bytes=F5&priority=0&guid=${GUID}"
+# # send the file
+# curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
+#     -H "Content-Type: application/octet-stream" --data-binary '@sven.sh' \
+#     "${OWNER}api/v1/device/svi?module=fdo_sys&var=filedesc&priority=1&filename=init-${DEVICESERIALNUMBER}.sh&guid=${GUID}"
 # run the file (this needs to be in cbor...)
 #curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
 #    -H "Content-Type: application/octet-stream" --data-binary '@sven.sh' \
@@ -102,9 +102,25 @@ curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
 #               + "' --header 'Content-Type: application/octet-stream' --data-binary "
 #               + "'@common/src/main/resources/linux64.sh'
 
-# list them
+CONFIGUREDEVICE=$(http --verify false --verbose --debug \
+    --form --ignore-stdin POST \
+    ${PORTAINER_URL}/api/fdo/configure/${GUID} \
+    "Authorization: ${jwt}" \
+    guid=${GUID} \
+    device_name=${DEVICESERIALNUMBER} \
+    device_profile="docker-standalone-edge")
+
+echo "Portainer says ${CONFIGUREDEVICE}"
+
+# list the device's ServiceInfo
 curl -v --digest -X GET --user apiUser:05EV9CbHbAQANc1t http://10.13.13.10:8042/api/v1/device/svi?guid=${GUID}
 
+
+# if you can watch the fdo rz container logs, it'll eventually happen :D
+echo
+echo "Waiting for 60 seconds, for Manufacturer to tell RZ about 'TO0 completed for GUID: ${GUID}' "
+echo
+sleep 60
 
 echo to complete the FDO onboarding, please run:
 echo
