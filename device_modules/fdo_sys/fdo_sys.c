@@ -61,10 +61,17 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 	size_t exec_instructions_sz = 0;
 	size_t file_remaining = 0;
 
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys(%u)\n", type);
+#endif
+
 	switch (type) {
 		case FDO_SI_START:
 		case FDO_SI_END:
 		case FDO_SI_FAILURE:
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - FDO_SI_START/FDO_SI_END/FDO_SI_FAILURE\n");
+#endif
 			// perform clean-ups as needed
 			if (!process_data(FDO_SYS_MOD_MSG_EXIT, NULL, 0, NULL,
 				NULL, NULL, NULL, NULL)) {
@@ -76,6 +83,9 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 			result = FDO_SI_SUCCESS;
 			goto end;
 		case FDO_SI_HAS_MORE_DSI:
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - FDO_SI_HAS_MORE_DSI\n");
+#endif
 			// calculate whether there is ServiceInfo to send NOW and update 'has_more'.
 			// For testing purposes, set this to true here, and false once first write is done.
 			if (!has_more) {
@@ -92,6 +102,9 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 			result = FDO_SI_SUCCESS;
 			goto end;
 		case FDO_SI_IS_MORE_DSI:
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - FDO_SI_IS_MORE_DSI\n");
+#endif
 			// calculate whether there is ServiceInfo to send in the NEXT iteration
 			// and update 'is_more'.
 			if (!is_more) {
@@ -105,6 +118,9 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 			result = FDO_SI_SUCCESS;
 			goto end;
 		case FDO_SI_GET_DSI:
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - FDO_SI_GET_DSI\n");
+#endif
 			// write Device ServiceInfo using 'fdow' by partitioning the messages as per MTU, here.
 			// however, it is not needed to be done currently and the variable is unused.
 			(void)mtu;
@@ -269,6 +285,9 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 			result = FDO_SI_SUCCESS;
 			goto end;
 		case FDO_SI_SET_OSI:
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - FDO_SI_SET_OSI\n");
+#endif
 			// Process the received Owner ServiceInfo contained within 'fdor', here.
 		strcmp_s(module_message, FDO_MODULE_MSG_LEN, "filedesc",
 					&strcmp_filedesc);
@@ -341,6 +360,9 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 				goto end;
 			}
 
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - delete fdo:sys:filedesc: %s\n", filename);
+#endif
 			if (true ==
 				delete_old_file((const char *)filename)) {
 				result = FDO_SI_SUCCESS;
@@ -399,6 +421,11 @@ int fdo_sys(fdo_sdk_si_type type, fdor_t *fdor, fdow_t *fdow,
 #endif
 				goto end;
 			}
+
+#ifdef DEBUG_LOGS
+				printf("Module fdo_sys - write fdo_sys:write: %s\n", filename);
+#endif
+
 			result = FDO_SI_SUCCESS;
 			goto end;
 		} else if (strcmp_exec == 0 || strcmp_execcb == 0) {

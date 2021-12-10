@@ -579,66 +579,81 @@ static bool add_module_devmod(void) {
 		LOG(LOG_ERROR, "Failed to add devmod:os\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:os", OS_NAME);
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:arch",
 				    ARCH)) {
 		LOG(LOG_ERROR, "Failed to add devmod:arch\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:arch", ARCH);
+
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:version",
 				    OS_VERSION)) {
 		LOG(LOG_ERROR, "Failed to add devmod:version\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:version", OS_VERSION);
+
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:device",
 				    (char *)get_device_model())) {
 		LOG(LOG_ERROR, "Failed to add devmod:device\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:device", (char *)get_device_model());
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:sn",
 				    (char *)get_device_serial_number())) {
 		LOG(LOG_ERROR, "Failed to add devmod:sn\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:sn", (char *)get_device_serial_number());
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:pathsep",
 				    PATH_SEPARATOR)) {
 		LOG(LOG_ERROR, "Failed to add devmod:pathsep\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:pathsep", PATH_SEPARATOR);
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:sep",
 				    SEPARATOR)) {
 		LOG(LOG_ERROR, "Failed to add devmod:sep\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:sep", SEPARATOR);
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:nl",
 				    NEWLINE)) {
 		LOG(LOG_ERROR, "Failed to add devmod:nl\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:nl", NEWLINE);
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:tmp",
 				    "")) {
 		LOG(LOG_ERROR, "Failed to add devmod:tmp\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:tmp", "");
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:dir",
 				    "")) {
 		LOG(LOG_ERROR, "Failed to add devmod:dir\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:dir", "");
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:progenv",
 				    PROGENV)) {
 		LOG(LOG_ERROR, "Failed to add devmod:progenv\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:progenv", PROGENV);
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:bin",
 				    BIN_TYPE)) {
 		LOG(LOG_ERROR, "Failed to add devmod:bin\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:bin", BIN_TYPE);
 	if (!fdo_service_info_add_kv_str(g_fdo_data->service_info, "devmod:mudurl",
 				    "")) {
 		LOG(LOG_ERROR, "Failed to add devmod:mudurl\n");
 		return false;
 	}
+	LOG(LOG_DEBUG, "SVEN: devmod(%s, %s) \n", "devmod:mudurl", "");
 
 	// should ideally contain supported ServiceInfo module list and its count.
 	// for now, set this to 1, since we've only 1 module 'fdo_sys'
@@ -1620,6 +1635,9 @@ static bool _STATE_TO2(void)
 			}
 			return ret;
 		}
+
+		// SVEN - do we know anything yet?
+		print_service_info_module_list();
 
 		// if we reach here no failures occurred and TO2 has completed.
 		// So proceed for shutdown and break.

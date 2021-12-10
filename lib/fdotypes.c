@@ -4810,6 +4810,9 @@ bool fdo_supply_serviceinfoval(fdor_t *fdor, char *module_name, char *module_mes
 		return retval;
 	}
 
+	LOG(LOG_DEBUG, "SVEN: fdo_supply_serviceinfoval(%s, %s) \n", module_name, module_message);
+
+
 	while (module_list) {
 		strcmp_s(module_list->module.module_name, FDO_MODULE_NAME_LEN,
 			 module_name, &strcmp_result);
@@ -4848,6 +4851,7 @@ bool fdo_supply_serviceinfoval(fdor_t *fdor, char *module_name, char *module_mes
 			}
 			// if the module is activated by the Owner, only then proceed with processing
 			// ServiceInfoVal via callback method
+			//module_list->module.active = true;
 			if (module_list->module.active) {
 				// check if module callback is successful
 				*cb_return_val = module_list->module.service_info_callback(
@@ -5488,12 +5492,15 @@ end:
 bool fdo_serviceinfo_external_mod_is_more(fdow_t *fdow,
 	fdo_sdk_service_info_module_list_t *module_list, size_t mtu, bool *is_more) {
 
+	LOG(LOG_DEBUG, "SVEN: fdo_serviceinfo_external_mod_is_more\n");
+
 	if (!fdow || !module_list || !is_more) {
 		return false;
 	}
 	fdo_sdk_service_info_module_list_t *traverse_list = module_list;
 	bool more = false;
 
+	//module_list->module.active = true;
 	while (traverse_list) {
 		if (traverse_list->module.active &&
 			traverse_list->module.service_info_callback(
@@ -5530,10 +5537,17 @@ fdo_sdk_service_info_module* fdo_serviceinfo_get_external_mod_to_write(fdow_t *f
 	if (!fdow || !module_list) {
 		return NULL;
 	}
+
+	LOG(LOG_DEBUG, "SVEN: fdo_serviceinfo_get_external_mod_to_write\n");
+
 	fdo_sdk_service_info_module_list_t *traverse_list = module_list;
 	bool has_more = false;
 
 	while (traverse_list) {
+		LOG(LOG_DEBUG, "SVEN: fdo_serviceinfo_get_external_mod_to_write(%s)\n", traverse_list->module.module_name);
+		//module_list->module.active = true;
+
+
 		if (traverse_list->module.active &&
 			traverse_list->module.service_info_callback(
 			FDO_SI_HAS_MORE_DSI, NULL, fdow, NULL, &has_more, NULL, mtu) != FDO_SI_SUCCESS) {
@@ -5563,6 +5577,9 @@ fdo_sdk_service_info_module* fdo_serviceinfo_get_external_mod_to_write(fdow_t *f
  */
 bool fdo_serviceinfo_external_mod_write(fdow_t *fdow, fdo_sdk_service_info_module *module,
 	size_t mtu) {
+
+	LOG(LOG_DEBUG, "SVEN: fdo_serviceinfo_external_mod_write\n");
+
 	if (!fdow || !module || !module->active) {
 		return false;
 	}
@@ -5679,6 +5696,8 @@ end:
 bool fdo_mod_exec_sv_infotype(fdo_sdk_service_info_module_list_t *module_list,
 			      fdo_sdk_si_type type)
 {
+	LOG(LOG_DEBUG, "SVEN: fdo_mod_exec_sv_infotype\n");
+
 	while (module_list) {
 		if (module_list->module.service_info_callback(
 			type, NULL, NULL, NULL, NULL, NULL, 0) != FDO_SI_SUCCESS) {

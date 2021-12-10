@@ -122,6 +122,7 @@ static fdo_sdk_service_info_module *fdo_sv_info_modules_init(void)
 		return NULL;
 	}
 	module_info[0].service_info_callback = fdo_sys;
+	//module_info[0].active = true;
 
 	return module_info;
 }
