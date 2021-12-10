@@ -66,50 +66,30 @@ VOUCHERS=$(http --verify false --form --ignore-stdin GET ${PORTAINER_URL}/api/fd
 # this list should container the device GUID 
 echo "GetVouchers: ${VOUCHERS}"
 
-# add more fdo_sys resources
-# see https://github.com/secure-device-onboard/pri-fidoiot/blob/2bac84514d02c89583585d3dfaa305681625c82a/component-samples/demo/owner/README.md
-# https://secure-device-onboard.github.io/docs/0.5.0/fdo/fdo-serviceinfo-sys/
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t -H "Content-Type: application/octet-stream" --data 1 'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=active&priority=12&guid='${GUID}
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t -H "Content-Type: application/octet-stream" --data "touch /sven" 'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=exec&priority=12&guid='${GUID}
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t -H "Content-Type: application/octet-stream" --data "touch /sven" 'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=exec&priority=12&device=alldevice&os=allos&arch=X86_64&hash=allhash&guid='${GUID}
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t -H "Content-Type: application/octet-stream" --data "true" 'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=active&priority=12&device=alldevice&os=allos&arch=X86_64&hash=allhash&guid='${GUID}
+EDGE_ENV_NAME=fdo-device-${DEVICESERIALNUMBER}
 
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t -H "Content-Type: application/octet-stream" --data "touch /sven" 'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=exec&priority=12&arch=X86_64&hash=allhash&guid='${GUID}
-
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t -H "Content-Type: application/octet-stream" --data "touch /sven2" 'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=exec&priority=12&device=Intel-FDO-Linux&arch=x86&os=Linux&version=Ubuntu-14&hash=allhash&guid='${GUID}
-
-# from https://github.com/secure-device-onboard/test-fidoiot/blob/6bdf0772a659ee997d4ee212f47ca65afc1af0b2/priTests/src/test/java/org/fidoalliance.fdo/test/PriSmokeTest.java
-# use priority to ensure they get sent to the device in the right order.
-# enable fdo_sys
-# curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
-#     -H "Content-Type: application/octet-stream" \
-#     "${OWNER}api/v1/device/svi?module=fdo_sys&var=active&bytes=F5&priority=0&guid=${GUID}"
-# # send the file
-# curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
-#     -H "Content-Type: application/octet-stream" --data-binary '@sven.sh' \
-#     "${OWNER}api/v1/device/svi?module=fdo_sys&var=filedesc&priority=1&filename=init-${DEVICESERIALNUMBER}.sh&guid=${GUID}"
-# run the file (this needs to be in cbor...)
-#curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
-#    -H "Content-Type: application/octet-stream" --data-binary '@sven.sh' \
-#    "${OWNER}api/v1/device/svi?module=fdo_sys&var=exec&priority=2&filename=init-${DEVICESERIALNUMBER}.sh&guid=${GUID}"
-
-# curl -v --digest -X PUT --user apiUser:05EV9CbHbAQANc1t \
-#     -H "Content-Type: application/octet-stream" --data-binary '@sven.sh' \
-#     'http://10.13.13.10:8042/api/v1/device/svi?module=fdo_sys&var=filedesc&priority=1&filename=init-${DEVICESERIALNUMBER}.sh&guid='${GUID}
-
-# curl --location --digest -u apiUser:" + ownerApiPass + " "
-#               + "--request PUT 'http://localhost:8042/api/v1/device/svi?module=fdo_sys&"
-#               + "var=filedesc&priority=1&filename=linux64.sh&guid=" + guid
-#               + "' --header 'Content-Type: application/octet-stream' --data-binary "
-#               + "'@common/src/main/resources/linux64.sh'
+TMPFILE=$(mktemp)
+http --verify false --verbose --debug \
+    -d --output ${TMPFILE} \
+    --form --ignore-stdin POST ${PORTAINER_URL}/api/endpoints "Authorization: ${jwt}" \
+    Name=="${EDGE_ENV_NAME}" \
+    EndpointCreationType:=4 \
+    GroupID:=1 \
+    TLS:=false \
+    TLSSkipVerify:=true \
+    TLSSkipClientVerify:=true \
+    URL=="${PORTAINER_URL}"
+CREATEENDPOINT=$(cat ${TMPFILE})
+rm ${TMPFILE}
+EDGE_KEY=$(echo ${CREATEENDPOINT} | jq -r '.EdgeKey')
 
 CONFIGUREDEVICE=$(http --verify false --verbose --debug \
     --form --ignore-stdin POST \
     ${PORTAINER_URL}/api/fdo/configure/${GUID} \
     "Authorization: ${jwt}" \
-    guid=${GUID} \
-    device_name=${DEVICESERIALNUMBER} \
-    device_profile="docker-standalone-edge")
+    edgekey=="${EDGE_KEY}" \
+    name=="${EDGE_ENV_NAME}" \
+    profile=="docker-standalone-edge")
 
 echo "Portainer says ${CONFIGUREDEVICE}"
 
