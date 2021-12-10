@@ -20,6 +20,7 @@ docker volume create "fdo-device-${DEVICESERIALNUMBER}"
 #docker pull ptrrd/client-sdk-fidoiot:linux
 docker run -it \
     --name fdo-device-${DEVICESERIALNUMBER} \
+    --privileged \
     --net host \
     --env DEVICESERIALNUMBER=${DEVICESERIALNUMBER} \
     --env MANUFACTURER=${MANUFACTURER} \

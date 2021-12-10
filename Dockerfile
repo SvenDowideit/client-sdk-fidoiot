@@ -1,6 +1,6 @@
 # see https://github.com/secure-device-onboard/client-sdk-fidoiot/blob/master/docs/linux.md
 
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as build
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq python-setuptools clang-format dos2unix ruby \
@@ -50,5 +50,25 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq xxd
 ENV MANUFACTURER="http://localhost:8039/"
 # get rid of the defaults so the entrypoint sets it
 RUN rm data/manufacturer_addr.bin
+
+ENTRYPOINT "./docker-entrypoint.sh"
+
+
+# see https://github.com/cruizba/ubuntu-dind
+FROM cruizba/ubuntu-dind:20.10.9
+
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq xxd
+# from https://github.com/secure-device-onboard/client-sdk-fidoiot/blob/master/docs/setup.md#3-setting-the-manufacturer-network-address
+# YES, it needs the :port
+# This is the Device Initialization (DI) protocol:
+ENV MANUFACTURER="http://localhost:8039/"
+# get rid of the defaults so the entrypoint sets it
+#RUN rm data/manufacturer_addr.bin
+
+WORKDIR /src/client-sdk-fidoiot/
+
+# TODO: narrow this down
+COPY --from=build --chown=1000:1000 /src/client-sdk-fidoiot .
 
 ENTRYPOINT "./docker-entrypoint.sh"

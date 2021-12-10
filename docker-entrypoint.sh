@@ -25,6 +25,15 @@ if [[ ! -e ./data/ecdsa256privkey.pem ]]; then
     FIRSTRUN="true"
 fi
 
+
+# need docker here during onboarding
+if [ "$FIRSTRUN" != "true" ]; then
+    nohup /usr/local/bin/startup.sh > docker.log &
+    echo "wait for Docker to start"
+    sleep 5
+    DOCKER_HOST=unix:///run/user/1000/docker.sock
+fi
+
 build/linux-client
 
 
