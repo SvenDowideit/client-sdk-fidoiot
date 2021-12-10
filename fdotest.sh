@@ -17,7 +17,7 @@ echo "device serial number: ${DEVICESERIALNUMBER}"
 docker volume create "fdo-device-${DEVICESERIALNUMBER}"
 
 # Manfacturing stage
-#docker pull ptrrd/client-sdk-fidoiot:linux
+#docker pull ptrrd/client-sdk-fidoiot:linux-dind
 docker run -it \
     --name fdo-device-${DEVICESERIALNUMBER} \
     --privileged \
@@ -25,7 +25,7 @@ docker run -it \
     --env DEVICESERIALNUMBER=${DEVICESERIALNUMBER} \
     --env MANUFACTURER=${MANUFACTURER} \
     -v "fdo-device-${DEVICESERIALNUMBER}:/src/client-sdk-fidoiot/data/" \
-        ptrrd/client-sdk-fidoiot:linux
+        ptrrd/client-sdk-fidoiot:linux-dind
 
 # get the voucher
 curl -v --digest --user apiUser:05EV9CbHbAQANc1t \
