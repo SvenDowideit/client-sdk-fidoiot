@@ -99,7 +99,9 @@ curl -v --digest -X GET --user apiUser:05EV9CbHbAQANc1t http://10.13.13.10:8042/
 
 # if you can watch the fdo rz container logs, it'll eventually happen :D
 echo
-echo "Waiting for 60 seconds, for Manufacturer to tell RZ about 'TO0 completed for GUID: ${GUID}' "
+echo "running in container fdo-device-${DEVICESERIALNUMBER}"
+echo
+echo "Waiting for 60 seconds, check for Owner log to container to have 'TO0 Client finished for GUID ${GUID}' "
 echo
 sleep 60
 
